@@ -1,5 +1,6 @@
 import aiohttp
 
+from datetime import datetime
 from typing import Iterable
 
 from zadanie1.api.utils import consts
@@ -10,9 +11,9 @@ from zadanie1.infrastructure.repositories.db import posts
 
 class PostMockRepository(IPostRepository):
     async def get_all_posts(self) -> Iterable[Post]:
-        all_params = await self._get_params()
-        parsed_params = await self._parse_params(all_params)
-        return parsed_params
+        for post in posts:
+            post.access_time = datetime.now()
+        return posts
 
     async def save_posts(self, posts: Iterable[Post]) -> None:
         all_params = await self._get_params()
@@ -21,14 +22,19 @@ class PostMockRepository(IPostRepository):
         posts.extend(parsed_params)
 
     async def get_by_title(self, title_fragment: str) -> Iterable[Post]:
-        all_params = await self._get_params()
-        parsed_params = await self._parse_params(all_params)
-        return list(filter(lambda x: title_fragment in x.title, parsed_params))
+        filtered = list(filter(lambda x: title_fragment in x.title, posts))
+        for post in filtered:
+            post.access_time = datetime.now()
+        return filtered
 
     async def get_by_body(self, body_fragment: str) -> Iterable[Post]:
-        all_params = await self._get_params()
-        parsed_params = await self._parse_params(all_params)
-        return list(filter(lambda x: body_fragment in x.body, parsed_params))
+        filtered = list(filter(lambda x: body_fragment in x.body, posts))
+        for post in filtered:
+            post.access_time = datetime.now()
+        return filtered
+
+    async def sort_by_access_time(self) -> Iterable[Post]:
+        return list(sorted(posts, key=lambda x: x.access_time, reverse=True))
 
     async def _get_params(self) -> Iterable[dict] | None:
         async with aiohttp.ClientSession() as session:

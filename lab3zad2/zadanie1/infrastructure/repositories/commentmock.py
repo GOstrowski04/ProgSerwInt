@@ -1,5 +1,6 @@
 import aiohttp
 
+from datetime import datetime
 from typing import Iterable
 
 from zadanie1.api.utils import consts
@@ -10,9 +11,9 @@ from zadanie1.infrastructure.repositories.db import comments
 
 class CommentMockRepository(ICommentRepository):
     async def get_all_comments(self) -> Iterable[Comment]:
-        all_params = await self._get_params()
-        parsed_params = await self._parse_params(all_params)
-        return parsed_params
+        for comment in comments:
+            comment.access_time = datetime.now()
+        return comments
 
     async def save_comments(self, comments: Iterable[Comment]) -> None:
         all_params = await self._get_params()
@@ -21,14 +22,19 @@ class CommentMockRepository(ICommentRepository):
         comments.extend(parsed_params)
 
     async def get_by_name(self, name_fragment: str) -> Iterable[Comment]:
-        all_params = await self._get_params()
-        parsed_params = await self._parse_params(all_params)
-        return list(filter(lambda x: name_fragment in x.name, parsed_params))
+        filtered = list(filter(lambda x: name_fragment in x.name, comments))
+        for comment in filtered:
+            comment.access_time = datetime.now()
+        return filtered
 
     async def get_by_body(self, body_fragment: str) -> Iterable[Comment]:
-        all_params = await self._get_params()
-        parsed_params = await self._parse_params(all_params)
-        return list(filter(lambda x: body_fragment in x.body, parsed_params))
+        filtered = list(filter(lambda x: body_fragment in x.body, comments))
+        for comment in filtered:
+            comment.access_time = datetime.now()
+        return filtered
+
+    async def sort_by_access_time(self) -> Iterable[Comment]:
+        return list(sorted(comments, key=lambda x: x.access_time, reverse=True))
 
     async def _get_params(self) -> Iterable[dict] | None:
         async with aiohttp.ClientSession() as session:
