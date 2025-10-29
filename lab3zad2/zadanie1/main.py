@@ -14,10 +14,8 @@ async def main(
 ) -> None:
     await post_service.save_posts(posts)
     await comment_service.save_comments(comments)
-    #print(posts)
+    print(posts)
     #print(comments)
-    print(await comment_service.get_by_name("id labore ex et quam"))
-    await asyncio.sleep(10)
     print(await comment_service.get_by_name("id labore ex et quam"))
 
 if __name__ == "__main__":

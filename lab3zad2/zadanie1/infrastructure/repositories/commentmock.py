@@ -1,6 +1,6 @@
 import aiohttp
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Iterable
 
 from zadanie1.api.utils import consts
@@ -11,6 +11,9 @@ from zadanie1.infrastructure.repositories.db import comments
 
 class CommentMockRepository(ICommentRepository):
     async def get_all_comments(self) -> Iterable[Comment]:
+        now = datetime.now()
+        filtered = list(filter(lambda x: (now - x.access_time).total_seconds() > 15, comments))
+        filtered.clear()
         for comment in comments:
             comment.access_time = datetime.now()
         return comments
@@ -28,12 +31,16 @@ class CommentMockRepository(ICommentRepository):
         return filtered
 
     async def get_by_body(self, body_fragment: str) -> Iterable[Comment]:
+        now = datetime.now()
+        filtered = list(filter(lambda x: (now - x.access_time).total_seconds() > 15, comments))
+        filtered.clear()
         filtered = list(filter(lambda x: body_fragment in x.body, comments))
         for comment in filtered:
             comment.access_time = datetime.now()
         return filtered
 
     async def sort_by_access_time(self) -> Iterable[Comment]:
+
         return list(sorted(comments, key=lambda x: x.access_time, reverse=True))
 
     async def _get_params(self) -> Iterable[dict] | None:
